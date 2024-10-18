@@ -13,15 +13,18 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        //Cursor.visible = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Movement
         speedX = Input.GetAxisRaw("Horizontal") * movSpeed;
         speedY = Input.GetAxisRaw("Vertical") * movSpeed;
         rb.velocity = new Vector2(speedX, speedY);
 
-        vfxRenderer.SetVector3("ColliderPos",transform.position);
+        // Visual Effect Position
+        vfxRenderer.SetVector3("ColliderPos", transform.position);
     }
 }
