@@ -7,6 +7,7 @@ public class PlayerControl : MonoBehaviour
 {
     public float movSpeed;
     float speedX, speedY;
+    public InventoryManager inventory;
     public VisualEffect vfxRenderer;
     Rigidbody2D rb;
     // Start is called before the first frame update
@@ -26,5 +27,14 @@ public class PlayerControl : MonoBehaviour
 
         // Visual Effect Position
         vfxRenderer.SetVector3("ColliderPos", transform.position);
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            //use the item
+            if (inventory.selectedItem != null)
+            {
+                inventory.selectedItem.Use(this);
+            }
+        }
     }
 }

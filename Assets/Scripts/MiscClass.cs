@@ -5,9 +5,11 @@ using UnityEngine;
 
 public class MiscClass : ItemClass
 {
-//data specific to misc class
-    public override ItemClass GetItem() {return this;}
-    public override ToolClass GetTool() {return null;}
+    //data specific to misc class
+    public override void Use(PlayerControl caller)
+    {
+        //base.Use(caller);
+    }
+
     public override MiscClass GetMisc() {return this;}
-    public override ConsumableClass GetConsumable() {return null;}
 }
