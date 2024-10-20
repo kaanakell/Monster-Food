@@ -16,7 +16,7 @@ public class CraftingRecipeClass : ScriptableObject
         {
             return false;
         }
-        
+
         for (int i = 0; i < inputItems.Length; i++)
         {
             if (!inventory.Contains(inputItems[i].GetItem(), inputItems[i].GetQuantity()))
@@ -38,6 +38,31 @@ public class CraftingRecipeClass : ScriptableObject
         }
         //ad the output item to the inventory
         inventory.Add(outputItem.GetItem(), outputItem.GetQuantity());
+    }
+
+    public bool CanCraft(CraftingManager craftingManager)
+    {
+        for (int i = 0; i < inputItems.Length; i++)
+        {
+            if (!craftingManager.Contains(inputItems[i].GetItem(), inputItems[i].GetQuantity()))
+            {
+                return false;
+            }
+        }
+
+        //return if inventory has input items
+        return true;
+    }
+
+    public void Craft(CraftingManager craftingManager)
+    {
+        //remove the input items from the inventory
+        for(int i = 0; i < inputItems.Length; i++)
+        {
+            craftingManager.Remove(inputItems[i].GetItem(), inputItems[i].GetQuantity());
+        }
+        //ad the output item to the inventory
+        craftingManager.AddCraftedItem(outputItem.GetItem(), outputItem.GetQuantity());
     }
 
 }

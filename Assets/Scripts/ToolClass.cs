@@ -20,5 +20,7 @@ public class ToolClass : ItemClass
         Debug.Log("Swing Tool");
     }
 
+
+
     public override ToolClass GetTool() {return this;}
 }
