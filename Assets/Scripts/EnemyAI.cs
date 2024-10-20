@@ -1,57 +1,69 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    public GameObject player;
-    public float speed;
-    public float distanceBetween;
-    public float stopFollowDistance;
-    public Transform moveSpot;
-    public float minX;
-    public float maxX;
-    public float minY;
-    public float maxY;
-    public float startWaitTime;
-    private float distance;
-    private float waitTime;
+    private GameObject player;
+    public float speed = 2f;
+    public float distanceBetween = 5f;
+    public float stopFollowDistance = 10f;
+
+    [Header("Patrol Settings")]
+    public float patrolRadius = 5f;
+    public float waitTime = 2f;
+    private Vector2 moveSpot;
+    private float waitCounter;
 
     private bool isPatrolling = true;
+    private Vector2 startingPosition;
 
     void Start()
     {
-        waitTime = startWaitTime;
-        moveSpot.position = new Vector2(Random.Range(minX, maxX), Random.Range(minY, maxY));
+        startingPosition = transform.position;
+        SetNewMoveSpot();
+        waitCounter = waitTime;
     }
 
     void Update()
     {
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+            if (player == null)
+            {
+                Debug.LogWarning("Player not found. Make sure it has the 'Player' tag.");
+                return;
+            }
+        }
+
         EnemyAILogic();
     }
 
     void EnemyPatrol()
     {
-        transform.position = Vector2.MoveTowards(transform.position, moveSpot.position, speed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(transform.position, moveSpot, speed * Time.deltaTime);
 
-        if (Vector2.Distance(transform.position, moveSpot.position) < .2f)
+        if (Vector2.Distance(transform.position, moveSpot) < 0.2f)
         {
-            if (waitTime <= 0)
+            if (waitCounter <= 0)
             {
-                moveSpot.position = new Vector2(Random.Range(minX, maxX), Random.Range(minY, maxY));
-                waitTime = startWaitTime;
+                SetNewMoveSpot();
+                waitCounter = waitTime;
             }
             else
             {
-                waitTime -= Time.deltaTime;
+                waitCounter -= Time.deltaTime;
             }
         }
     }
 
+    void SetNewMoveSpot()
+    {
+        moveSpot = startingPosition + Random.insideUnitCircle * patrolRadius;
+    }
+
     void EnemyFollow()
     {
-        distance = Vector2.Distance(transform.position, player.transform.position);
-        Vector2 direction = player.transform.position - transform.position;
+        Vector2 direction = (Vector2)player.transform.position - (Vector2)transform.position;
         direction.Normalize();
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
@@ -62,7 +74,7 @@ public class EnemyAI : MonoBehaviour
 
     void EnemyAILogic()
     {
-        distance = Vector2.Distance(transform.position, player.transform.position);
+        float distance = Vector2.Distance(transform.position, player.transform.position);
 
         if (distance < distanceBetween)
         {
@@ -70,12 +82,19 @@ public class EnemyAI : MonoBehaviour
         }
         else if (distance > stopFollowDistance)
         {
-            isPatrolling = true; // Resume patrolling when player is far enough
+            isPatrolling = true;
         }
 
         if (isPatrolling)
         {
             EnemyPatrol();
         }
+    }
+
+    // Optional: Visualize patrol area in editor
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(startingPosition, patrolRadius);
     }
 }
