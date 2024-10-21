@@ -6,7 +6,7 @@ public class ItemClass : ScriptableObject
 {
     [Header("Item")]//data shared across every item
     public string itemName;
-    [HideInInspector]public int Id;
+    [HideInInspector]public int Id{get; set;}
     public Sprite itemIcon;
     public bool isStackable = true;
 

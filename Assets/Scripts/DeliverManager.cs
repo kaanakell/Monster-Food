@@ -5,14 +5,20 @@ using UnityEngine.UI;
 
 public class DeliverManager : BaseInventory
 {
-    public int id;
+    public int[] ids;
+    private int currentId;
     [SerializeField] private Button submitButton;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private DataArrayObject dataArrayObject;
     private void Awake()
     {
-        submitButton.onClick.AddListener(OnCraftButtonClicked);
+        submitButton.onClick.AddListener(OnSubmitButtonClicked);
+        SetCurrentId();
+        VisualizeSetCurrentId();
+
     }
 
-    private void OnCraftButtonClicked()
+    private void OnSubmitButtonClicked()
     {
         // Handle crafting
         Submit();
@@ -20,16 +26,21 @@ public class DeliverManager : BaseInventory
 
     public void Submit()
     {
-        /*var recipe = craftingRecipes[0];
-        if (recipe.CanCraft(this))
+        var slotItem = items[0].GetItem();
+        if (slotItem.Id == currentId)
         {
-            recipe.Craft(this);
+            //Timer reset
+            Debug.Log("same");
+            SetCurrentId();
+            VisualizeSetCurrentId();
+            Remove(items[0].GetItem());
+
         }
         else
         {
-            //show error msg
-            Debug.Log("Cant craft that item!");
-        }*/
+            //GameOver
+            Debug.Log("farklı");
+        }
     }
 
     public bool AddSubmitItem(ItemClass item, int quantity)
@@ -47,5 +58,16 @@ public class DeliverManager : BaseInventory
         }
         RefreshUI();
         return true;
+    }
+
+    public void SetCurrentId()
+    {
+        var Random = UnityEngine.Random.Range(0, ids.Length);
+        currentId = Random;
+    }
+
+    public void VisualizeSetCurrentId()
+    {
+        spriteRenderer.sprite = dataArrayObject.dataArray[currentId].itemIcon;
     }
 }

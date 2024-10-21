@@ -20,7 +20,6 @@ public class InteractiveObject : MonoBehaviour
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             TogglePanel();
-
         }
     }
 
