@@ -39,9 +39,14 @@ public class BaseInventory : MonoBehaviour
         {
             slots[i] = slotHolder.transform.GetChild(i).gameObject;
         }
-
-        Add(itemToAdd, 1);
-        Remove(itemToRemove);
+        if (itemToAdd != null)
+        {
+            Add(itemToAdd, 1);
+        }
+        if (itemToRemove != null)
+        {
+            Remove(itemToRemove);
+        }
         RefreshUI();
         itemClickHandler.RegisterInventory(this);
     }

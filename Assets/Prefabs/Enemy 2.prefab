@@ -101,16 +101,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7458c992d6aed084c9eaeea5f095e3b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
   speed: 2
   distanceBetween: 5
   stopFollowDistance: 3
-  moveSpot: {fileID: 0}
-  minX: -18
-  maxX: 18
-  minY: 20
-  maxY: 35
-  startWaitTime: 3
+  patrolRadius: 5
+  waitTime: 2
 --- !u!61 &3963113478003176815
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -196,12 +191,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 50
-  itemDrop: {fileID: 0}
+  itemDrop: {fileID: 8530427574710741226, guid: f2e12a69117f6ab43964bbfdbf0a78e1, type: 3}
   animator: {fileID: 0}
   rb: {fileID: 4617970465507539257}
   knockBackForce: 10
   knockBackForceUp: 2
   knockTime: 0.5
+  dropItemQuantity: 1
 --- !u!95 &2075621452771340199
 Animator:
   serializedVersion: 5

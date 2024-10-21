@@ -1,28 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CraftingManager : BaseInventory
+public class DeliverManager : BaseInventory
 {
     public int id;
-    [SerializeField] private Button craftingButton;
-
+    [SerializeField] private Button submitButton;
     private void Awake()
     {
-        craftingButton.onClick.AddListener(OnCraftButtonClicked);
+        submitButton.onClick.AddListener(OnCraftButtonClicked);
     }
 
     private void OnCraftButtonClicked()
     {
         // Handle crafting
-        Craft();
+        Submit();
     }
 
-    public void Craft()
+    public void Submit()
     {
-        var recipe = craftingRecipes[0];
+        /*var recipe = craftingRecipes[0];
         if (recipe.CanCraft(this))
         {
             recipe.Craft(this);
@@ -31,10 +29,10 @@ public class CraftingManager : BaseInventory
         {
             //show error msg
             Debug.Log("Cant craft that item!");
-        }
+        }*/
     }
 
-    public bool AddCraftedItem(ItemClass item, int quantity)
+    public bool AddSubmitItem(ItemClass item, int quantity)
     {
         SlotClass slots = Contains(item);
         if (slots != null && slots.GetItem().isStackable)
@@ -43,13 +41,11 @@ public class CraftingManager : BaseInventory
         }
         else
         {
-                 
-        items[3].AddItem(item, quantity);
-    
+
+            items[0].AddItem(item, quantity);
+
         }
         RefreshUI();
         return true;
     }
-
-
 }

@@ -34,9 +34,16 @@ public class DataArrayObjectEditor : Editor
     {
         // Put any additional logic you need to execute when the array size changes
         // Example: Logging or modifying other properties
-          /*for(int i = 0; i < dataArrays.Length; i++){
-               data.Id = i;
-           }*/
+        for (int i = 0; i < dataArray.arraySize; i++)
+        {
+            SerializedProperty data = dataArray.GetArrayElementAtIndex(i);
+            SerializedProperty idProperty = data.FindPropertyRelative("Id");
+
+            if (idProperty != null)
+            {
+                idProperty.intValue = i;
+            }
+        }
         Debug.Log("Array size has been updated.");
     }
 }

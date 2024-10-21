@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    
     public float maxHealth;
     float currentHealth;
 
 
-    public GameObject itemDrop;
+    public DropItem itemDrop;
 
     public Animator animator;
 
@@ -18,26 +19,29 @@ public class Enemy : MonoBehaviour
 
     public float knockTime;
 
+    public int dropItemQuantity = 1;
+
     void Awake()
     {
         animator = GetComponentInChildren<Animator>();
-        
+
     }
 
     // Update is called once per frame
     void Start()
     {
-        
+
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
-        
+
     }
 
     void Update()
     {
-        
+
 
     }
+
 
 
     public void TakeDamage(float damage)
@@ -48,20 +52,20 @@ public class Enemy : MonoBehaviour
 
         knockBack();
 
-        if(currentHealth <= 0)
+        if (currentHealth <= 0)
         {
             Die();
         }
     }
 
     public void knockBack()
-{
-    Transform attacker = getClosestDamageSource();
-    Vector3 knockbackDirection = (transform.position - attacker.position).normalized;
-    knockbackDirection.y = 0; // Ensure no vertical knockback
-    rb.AddForce(knockbackDirection * knockBackForce + Vector3.up * knockBackForceUp, ForceMode2D.Impulse);
-    StartCoroutine(KnockCo(rb));
-}
+    {
+        Transform attacker = getClosestDamageSource();
+        Vector3 knockbackDirection = (transform.position - attacker.position).normalized;
+        knockbackDirection.y = 0; // Ensure no vertical knockback
+        rb.AddForce(knockbackDirection * knockBackForce + Vector3.up * knockBackForceUp, ForceMode2D.Impulse);
+        StartCoroutine(KnockCo(rb));
+    }
 
     public Transform getClosestDamageSource()
     {
@@ -69,11 +73,11 @@ public class Enemy : MonoBehaviour
         float closestDistance = Mathf.Infinity;
         Transform currentClosestDamageSource = null;
 
-        foreach(GameObject go in DamageSources)
+        foreach (GameObject go in DamageSources)
         {
             float currentDistance;
             currentDistance = Vector3.Distance(transform.position, go.transform.position);
-            if(currentDistance < closestDistance)
+            if (currentDistance < closestDistance)
             {
                 closestDistance = currentDistance;
                 currentClosestDamageSource = go.transform;
@@ -98,7 +102,11 @@ public class Enemy : MonoBehaviour
     void Destroy()
     {
         Destroy(gameObject);
-        Instantiate(itemDrop, transform.position, Quaternion.identity);
+        if (itemDrop != null)
+        {
+            var droppedItem = Instantiate(itemDrop, transform.position, Quaternion.identity);
+            droppedItem.Quantity = dropItemQuantity;
+        }
     }
 
     private IEnumerator KnockCo(Rigidbody2D rb)
