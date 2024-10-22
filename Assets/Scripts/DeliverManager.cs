@@ -30,16 +30,15 @@ public class DeliverManager : BaseInventory
         if (slotItem.Id == currentId)
         {
             //Timer reset
-            Debug.Log("same");
+            Debug.Log("Ids match: " + slotItem.Id + " == " + currentId);
             SetCurrentId();
             VisualizeSetCurrentId();
             Remove(items[0].GetItem());
-
         }
         else
         {
             //GameOver
-            Debug.Log("farklı");
+             Debug.Log("Ids don't match: " + slotItem.Id + " != " + currentId);
         }
     }
 
