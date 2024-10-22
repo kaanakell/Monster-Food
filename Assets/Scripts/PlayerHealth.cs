@@ -15,11 +15,14 @@ public class PlayerHealth : MonoBehaviour
     private bool isDead = false;
     private float nextDamageTime = 0f;
 
+    public float damageOverTime;
+
     void Start()
     {
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
         animator = GetComponent<Animator>();
+        InvokeRepeating("DamageOverTime", 0, 1f);
     }
 
     void Update()
@@ -40,6 +43,28 @@ public class PlayerHealth : MonoBehaviour
                 break; // Only take damage from one enemy at a time
             }
         }
+    }
+
+    private void DamageOverTime()
+    {
+        Debug.Log("Damage");
+        currentHealth -= damageOverTime;
+
+        healthBar.SetHealth(currentHealth);
+
+        //Play hurt anim
+        //animator.SetTrigger("Hurt");
+
+        if (currentHealth <= 0)
+        {
+            animator.SetTrigger("IsDead");
+            Invoke("Die", 1f);
+        }
+        else
+        {
+            Time.timeScale = 1;
+        }
+
     }
 
     public void TakeDamage(float damage)

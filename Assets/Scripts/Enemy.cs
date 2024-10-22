@@ -4,53 +4,38 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    
     public float maxHealth;
-    float currentHealth;
-
+    private float currentHealth;
 
     public DropItem itemDrop;
-
     public Animator animator;
-
     public Rigidbody2D rb;
-    public float knockBackForce = 10f;
-    public float knockBackForceUp = 2f;
-
-    public float knockTime;
-
+    public float knockBackForce = 10f; // Single knockback force for top-down
+    public float knockTime = 0.2f; // Time to apply knockback force
+    public float knockbackSmoothTime = 0.2f; // Time for the knockback to smoothly reduce
     public int dropItemQuantity = 1;
+
+    // Declare the OnDestroyed event
+    public delegate void EnemyDestroyed();
+    public event EnemyDestroyed OnDestroyed;
 
     void Awake()
     {
         animator = GetComponentInChildren<Animator>();
-
     }
 
-    // Update is called once per frame
     void Start()
     {
-
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
-
     }
-
-    void Update()
-    {
-
-
-    }
-
-
 
     public void TakeDamage(float damage)
     {
         Debug.Log("Give Damage");
         currentHealth -= damage;
-        //FindObjectOfType<AudioManager>().Play("SwordHit");
 
-        knockBack();
+        ApplyKnockback(); // Apply smoother knockback
 
         if (currentHealth <= 0)
         {
@@ -58,25 +43,39 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public void knockBack()
+    // Function to apply smoother knockback
+    public void ApplyKnockback()
     {
-        Transform attacker = getClosestDamageSource();
-        Vector3 knockbackDirection = (transform.position - attacker.position).normalized;
-        knockbackDirection.y = 0; // Ensure no vertical knockback
-        rb.AddForce(knockbackDirection * knockBackForce + Vector3.up * knockBackForceUp, ForceMode2D.Impulse);
-        StartCoroutine(KnockCo(rb));
+        Transform attacker = GetClosestDamageSource();
+        Vector2 knockbackDirection = (transform.position - attacker.position).normalized;
+        StartCoroutine(SmoothKnockback(knockbackDirection * knockBackForce));
     }
 
-    public Transform getClosestDamageSource()
+    // Coroutine for smoother knockback effect
+    private IEnumerator SmoothKnockback(Vector2 force)
     {
-        GameObject[] DamageSources = GameObject.FindGameObjectsWithTag("Player");
+        float elapsedTime = 0;
+        Vector2 originalVelocity = rb.velocity;
+
+        while (elapsedTime < knockbackSmoothTime)
+        {
+            rb.velocity = Vector2.Lerp(force, Vector2.zero, elapsedTime / knockbackSmoothTime);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        rb.velocity = Vector2.zero; // Ensure the velocity is zero at the end
+    }
+
+    public Transform GetClosestDamageSource()
+    {
+        GameObject[] damageSources = GameObject.FindGameObjectsWithTag("Player");
         float closestDistance = Mathf.Infinity;
         Transform currentClosestDamageSource = null;
 
-        foreach (GameObject go in DamageSources)
+        foreach (GameObject go in damageSources)
         {
-            float currentDistance;
-            currentDistance = Vector3.Distance(transform.position, go.transform.position);
+            float currentDistance = Vector3.Distance(transform.position, go.transform.position);
             if (currentDistance < closestDistance)
             {
                 closestDistance = currentDistance;
@@ -90,32 +89,27 @@ public class Enemy : MonoBehaviour
     void Die()
     {
         Debug.Log("Enemy died!");
-        //FindObjectOfType<AudioManager>().Play("DeathSound");
-        //Die anim
-        //animator.SetTrigger("isDead");
-        //Disable enemy
+
+        // Play death animation, sound, etc.
         GetComponent<Collider2D>().enabled = false;
         Invoke("Destroy", 0.2f);
         this.enabled = false;
     }
 
-    void Destroy()
+    public void Destroy()
     {
+        // Trigger OnDestroyed event
+        if (OnDestroyed != null)
+        {
+            OnDestroyed.Invoke();
+        }
+
         Destroy(gameObject);
+
         if (itemDrop != null)
         {
             var droppedItem = Instantiate(itemDrop, transform.position, Quaternion.identity);
             droppedItem.Quantity = dropItemQuantity;
         }
     }
-
-    private IEnumerator KnockCo(Rigidbody2D rb)
-    {
-        if (rb != null)
-        {
-            yield return new WaitForSeconds(knockTime);
-            rb.velocity = Vector3.zero;
-        }
-    }
-
 }

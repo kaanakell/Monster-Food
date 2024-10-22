@@ -14,14 +14,25 @@ public class PlayerControl : MonoBehaviour
     public GameObject craftingPanel;
     public GameObject servePanel;
     public Animator animator;
+    private string currentState;
+    //Animation States
+    const string PLAYER_IDLE = "PlayerIdle";
+    const string PLAYER_RUN_RIGHT = "PlayerRunRight";
+    const string PLAYER_RUN_LEFT = "PlayerRunLeft";
+    const string PLAYER_RUN_UP = "PlayerRunUp";
+    const string PLAYER_RUN_DOWN = "PlayerRunDown";
+
+    private bool isMoving;
+
     private DropItem currentDroppedItem;
     private bool itemInRange = false;
 
     private bool isPanelOpen = false;
-    Rigidbody2D rb;
+    public Rigidbody2D rb;
     // Start is called before the first frame update
     void Start()
     {
+        animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         //Cursor.visible = false;
         if (inventoryPanel != null)
@@ -33,13 +44,8 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Movement
-        speedX = Input.GetAxisRaw("Horizontal") * movSpeed;
-        speedY = Input.GetAxisRaw("Vertical") * movSpeed;
-        rb.velocity = new Vector2(speedX, speedY);
-
-        animator.SetFloat("Speed", rb.velocity.magnitude);
-
+        //animator.SetFloat("Speed", rb.velocity.magnitude);
+        Move();
         // Visual Effect Position
         vfxRenderer.SetVector3("ColliderPos", transform.position);
 
@@ -68,6 +74,88 @@ public class PlayerControl : MonoBehaviour
         }
 
         AddItemToInventory();
+    }
+
+    public void Move()
+    {
+        // Movement
+        float speedX = Input.GetAxisRaw("Horizontal") * movSpeed;
+        float speedY = Input.GetAxisRaw("Vertical") * movSpeed;
+
+        // Update the velocity of the rigidbody based on the input
+        rb.velocity = new Vector2(speedX, speedY);
+
+        // Determine animation state based on movement direction
+        if (speedX < 0)
+        {
+            // Moving left
+            ChangeAnimationState(PLAYER_RUN_RIGHT);
+            transform.localScale = new Vector2(-1, 1); // Flip the sprite to the left
+        }
+        else if (speedX > 0)
+        {
+            // Moving right
+            ChangeAnimationState(PLAYER_RUN_RIGHT);
+            transform.localScale = new Vector2(1, 1); // Ensure sprite faces right
+        }
+        else if (speedY > 0)
+        {
+            // Moving up
+            ChangeAnimationState(PLAYER_RUN_UP);
+        }
+        else if (speedY < 0)
+        {
+            // Moving down
+            ChangeAnimationState(PLAYER_RUN_DOWN);
+        }
+        else
+        {
+            // Idle state (no movement)
+            ChangeAnimationState(PLAYER_IDLE);
+        }
+
+    }
+
+    public void ChangeAnimationStateAccordingToMovement()
+    {
+        float speedX = rb.velocity.x;
+        float speedY = rb.velocity.y;
+
+        if (speedX < 0)
+        {
+            ChangeAnimationState(PLAYER_RUN_LEFT);
+            transform.localScale = new Vector2(-1, 1); // Face left
+        }
+        else if (speedX > 0)
+        {
+            ChangeAnimationState(PLAYER_RUN_RIGHT);
+            transform.localScale = new Vector2(1, 1); // Face right
+        }
+        else if (speedY > 0)
+        {
+            ChangeAnimationState(PLAYER_RUN_UP);
+        }
+        else if (speedY < 0)
+        {
+            ChangeAnimationState(PLAYER_RUN_DOWN);
+        }
+        else
+        {
+            ChangeAnimationState(PLAYER_IDLE); // Idle if not moving
+        }
+    }
+
+
+    public void ChangeAnimationState(string newState)
+    {
+        //stop the same animation from interrupting itself
+        if (currentState == newState) return;
+
+        //play the animation
+        animator.Play(newState);
+
+        //reassign the current state
+        currentState = newState;
     }
 
     void TogglePanel()
@@ -102,7 +190,7 @@ public class PlayerControl : MonoBehaviour
         // Check for E key press when player is in range
         if (itemInRange && Input.GetKeyDown(KeyCode.E))
         {
-            if(currentDroppedItem != null)
+            if (currentDroppedItem != null)
             {
                 inventory.Add(currentDroppedItem.Item, currentDroppedItem.Quantity);
                 Destroy(currentDroppedItem.gameObject);

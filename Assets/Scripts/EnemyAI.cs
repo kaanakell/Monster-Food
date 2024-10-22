@@ -63,12 +63,8 @@ public class EnemyAI : MonoBehaviour
 
     void EnemyFollow()
     {
-        Vector2 direction = (Vector2)player.transform.position - (Vector2)transform.position;
-        direction.Normalize();
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
+        // Move towards the player but keep the original rotation
         transform.position = Vector2.MoveTowards(transform.position, player.transform.position, speed * Time.deltaTime);
-        transform.rotation = Quaternion.Euler(Vector3.forward * angle);
         isPatrolling = false;
     }
 

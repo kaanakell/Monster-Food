@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: FoodIngredient1
   m_EditorClassIdentifier: 
   itemName: Ingredient1
-  itemIcon: {fileID: 21300000, guid: d77af569d2e425745a16011ecab573cf, type: 3}
+  Id: 0
+  itemIcon: {fileID: 21300000, guid: 1853a00b6477263409c5df25ae73cf9e, type: 3}
   isStackable: 1

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: MonsterFood2
   m_EditorClassIdentifier: 
   itemName: Monster Food 2
-  Id: 0
-  itemIcon: {fileID: 21300000, guid: 287139d3366a89641bea43148d4d9285, type: 3}
+  Id: 1
+  itemIcon: {fileID: 21300000, guid: f3e5721184e1b8c49a419e02ebf1dcad, type: 3}
   isStackable: 1
