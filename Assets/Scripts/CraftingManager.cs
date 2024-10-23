@@ -26,17 +26,21 @@ public class CraftingManager : BaseInventory
 
     public void Craft()
     {
-        var recipe = craftingRecipes[0];
-        if (recipe.CanCraft(this))
+        foreach (var recipe in craftingRecipes)
         {
-            recipe.Craft(this);
+            // Check if the current recipe can be crafted
+            if (recipe.CanCraft(this))
+            {
+                recipe.Craft(this);
+                Debug.Log("Crafted: " + recipe.outputItem.GetItem().itemName);
+                return;  // Exit the method after crafting to avoid crafting multiple recipes at once
+            }
         }
-        else
-        {
-            //show error msg
-            Debug.Log("Cant craft that item!");
-        }
+
+        // If none of the recipes can be crafted, show an error message
+        Debug.Log("Can't craft any items!");
     }
+
 
     public bool AddCraftedItem(ItemClass item, int quantity)
     {
@@ -47,9 +51,9 @@ public class CraftingManager : BaseInventory
         }
         else
         {
-                 
-        items[3].AddItem(item, quantity);
-    
+
+            items[3].AddItem(item, quantity);
+
         }
         RefreshUI();
         return true;

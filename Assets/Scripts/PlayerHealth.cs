@@ -21,6 +21,13 @@ public class PlayerHealth : MonoBehaviour
     public GameObject gameOverUI;
     private Image gameOverImage;
 
+    public Button mainMenuButton;  // Add reference to the Main Menu button
+    public Button restartButton;   // Add reference to the Restart button
+    public float buttonMoveDelay = 2f;  // Delay before moving buttons
+    public float buttonMoveDuration = 1f;  // Duration of button animation
+    private Vector3 offScreenPosition; // Initial position of the buttons
+    private Vector3 onScreenPosition;  // Final position of the buttons
+
     // Audio-related fields
     public AudioSource audioSource;
     public AudioClip hitSound; // Add the hit sound
@@ -119,6 +126,27 @@ public class PlayerHealth : MonoBehaviour
 
         // Then stop the time after the panel starts fading in
         Time.timeScale = 0;
+
+        yield return new WaitForSeconds(buttonMoveDelay);  // Wait before moving buttons
+
+        // Animate buttons into view
+        StartCoroutine(MoveButton(mainMenuButton, onScreenPosition));
+        StartCoroutine(MoveButton(restartButton, onScreenPosition));
+    }
+
+    IEnumerator MoveButton(Button button, Vector3 targetPosition)
+    {
+        Vector3 startPosition = button.transform.position;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < buttonMoveDuration)
+        {
+            elapsedTime += Time.unscaledDeltaTime;  // Ensure smooth animation even when time is paused
+            button.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / buttonMoveDuration);
+            yield return null;
+        }
+
+        button.transform.position = targetPosition;  // Ensure exact final position
     }
 
     void DisplayGameOverUI()

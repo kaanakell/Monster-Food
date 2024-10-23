@@ -3,6 +3,7 @@ using UnityEngine;
 public class InteractiveObject : MonoBehaviour
 {
     public GameObject interactionPanel;
+    public AudioSource pickupSound;  // Reference to the AudioSource component for the pickup sound
     private bool playerInRange = false;
 
     private void Start()
@@ -12,6 +13,12 @@ public class InteractiveObject : MonoBehaviour
         {
             interactionPanel.SetActive(false);
         }
+
+        // Check if pickup sound source is set, otherwise find the AudioSource attached to this GameObject
+        if (pickupSound == null)
+        {
+            pickupSound = GetComponent<AudioSource>();
+        }
     }
 
     private void Update()
@@ -20,6 +27,8 @@ public class InteractiveObject : MonoBehaviour
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             TogglePanel();
+
+            PlayPickupSound();
         }
     }
 
@@ -41,6 +50,18 @@ public class InteractiveObject : MonoBehaviour
             {
                 interactionPanel.SetActive(false);
             }
+        }
+    }
+
+    private void PlayPickupSound()
+    {
+        if (pickupSound != null)
+        {
+            pickupSound.Play();  // Play the pickup sound
+        }
+        else
+        {
+            Debug.LogWarning("Pickup sound AudioSource is not assigned.");
         }
     }
 

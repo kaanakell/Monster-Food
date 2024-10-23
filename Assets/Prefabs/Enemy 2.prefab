@@ -140,7 +140,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.0014931858, y: -0.0029859766}
+  m_Offset: {x: 0.0022746325, y: 0.0120842755}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -151,7 +151,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.340016, y: 0.33702976}
+  m_Size: {x: 0.70548296, y: 0.5819308}
   m_EdgeRadius: 0
 --- !u!50 &1270440779683343905
 Rigidbody2D:
@@ -192,18 +192,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ef446805daae8e47b9671d096513ef7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  enemyHealthBar: {fileID: 0}
-  healthBarCanvas: {fileID: 0}
+  maxHealth: 250
+  enemyHealthBar: {fileID: 6485102234800488762}
+  healthBarCanvas: {fileID: 7849567483747813876}
   itemDrop: {fileID: 6883892894370440819, guid: 4a7e46bf939598e40b41cc4499eab9c7, type: 3}
   animator: {fileID: 0}
   rb: {fileID: 1270440779683343905}
-  knockBackForce: 10
-  knockTime: 0.5
+  knockBackForce: 15
+  knockTime: 0.75
   knockbackSmoothTime: 0.2
-  dropItemQuantity: 1
+  dropItemQuantity: 2
   audioSource: {fileID: 715942406577977966}
-  hitSound: {fileID: 8300000, guid: 42f11658c687678438530430b106aff0, type: 3}
+  hitSound: {fileID: 8300000, guid: 805a338bbef41e64585a80397d12da32, type: 3}
 --- !u!95 &7947219841875528345
 Animator:
   serializedVersion: 5

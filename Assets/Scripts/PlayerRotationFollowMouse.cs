@@ -1,21 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerRotationFollowMouse : MonoBehaviour
 {
+    private Camera cam;
+
+    void Start()
+    {
+        // Reference to the Cinemachine virtual camera
+        cam = Camera.main;  // Assuming the main camera is using Cinemachine
+    }
+
     void Update()
     {
-        // Get the mouse position in the world
-        Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        // Get the mouse position in world space using the main Cinemachine camera
+        Vector3 mousePosition = Input.mousePosition;
+        mousePosition.z = 0;  // Ensure z-axis is 0 for 2D space
         
-        // Calculate the direction from the light to the mouse position
-        Vector2 direction = (mousePosition - (Vector2)transform.position).normalized;
+        mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
 
-        // Calculate the angle to rotate the light towards the mouse
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        // Calculate the direction from the player to the mouse
+        Vector2 direction = new Vector2(mousePosition.x - transform.position.x, mousePosition.y - transform.position.y).normalized;
 
-        // Set the rotation of the light
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        transform.up = direction;
+
+        // Calculate the angle in degrees to rotate towards the mouse
+        //float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        // Apply the rotation to the player object on the Z axis (2D space)
+        //transform.rotation = Quaternion.Euler(0, 0, angle);
     }
 }
