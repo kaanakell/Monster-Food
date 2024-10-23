@@ -1,23 +1,28 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    public float maxHealth;
+    public float maxHealth = 100f;
     private float currentHealth;
 
+    public Slider enemyHealthBar;  // Reference to the health bar slider
+    public Canvas healthBarCanvas;  // Reference to the health bar canvas (UI component)
+    
     public DropItem itemDrop;
     public Animator animator;
     public Rigidbody2D rb;
-    public float knockBackForce = 10f; // Single knockback force for top-down
-    public float knockTime = 0.2f; // Time to apply knockback force
-    public float knockbackSmoothTime = 0.2f; // Time for the knockback to smoothly reduce
+    public float knockBackForce = 10f;
+    public float knockTime = 0.2f;
+    public float knockbackSmoothTime = 0.2f;
     public int dropItemQuantity = 1;
 
-    // Declare the OnDestroyed event
     public delegate void EnemyDestroyed();
     public event EnemyDestroyed OnDestroyed;
+
+    public AudioSource audioSource;
+    public AudioClip hitSound; // Add the hit sound
 
     void Awake()
     {
@@ -28,14 +33,38 @@ public class Enemy : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
+
+        // Set the max value of the health bar and initialize current value
+        if (enemyHealthBar != null)
+        {
+            enemyHealthBar.maxValue = maxHealth;
+            enemyHealthBar.value = currentHealth;
+        }
+
+        // Initialize the AudioSource if not already set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
     }
 
     public void TakeDamage(float damage)
     {
-        Debug.Log("Give Damage");
         currentHealth -= damage;
 
-        ApplyKnockback(); // Apply smoother knockback
+        // Update the health bar
+        if (enemyHealthBar != null)
+        {
+            enemyHealthBar.value = currentHealth;
+        }
+
+        // Play hit sound
+        if (hitSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(hitSound);
+        }
+
+        ApplyKnockback();
 
         if (currentHealth <= 0)
         {
@@ -43,7 +72,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // Function to apply smoother knockback
     public void ApplyKnockback()
     {
         Transform attacker = GetClosestDamageSource();
@@ -51,7 +79,6 @@ public class Enemy : MonoBehaviour
         StartCoroutine(SmoothKnockback(knockbackDirection * knockBackForce));
     }
 
-    // Coroutine for smoother knockback effect
     private IEnumerator SmoothKnockback(Vector2 force)
     {
         float elapsedTime = 0;
@@ -64,7 +91,7 @@ public class Enemy : MonoBehaviour
             yield return null;
         }
 
-        rb.velocity = Vector2.zero; // Ensure the velocity is zero at the end
+        rb.velocity = Vector2.zero;
     }
 
     public Transform GetClosestDamageSource()
@@ -88,9 +115,6 @@ public class Enemy : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("Enemy died!");
-
-        // Play death animation, sound, etc.
         GetComponent<Collider2D>().enabled = false;
         Invoke("Destroy", 0.2f);
         this.enabled = false;
@@ -98,7 +122,6 @@ public class Enemy : MonoBehaviour
 
     public void Destroy()
     {
-        // Trigger OnDestroyed event
         if (OnDestroyed != null)
         {
             OnDestroyed.Invoke();

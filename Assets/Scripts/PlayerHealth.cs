@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;  // Include this for working with UI elements like Image
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -10,12 +10,20 @@ public class PlayerHealth : MonoBehaviour
     public float damageInterval = 0.5f; // Time between damage applications when in contact
     public HealthBar healthBar;
     public float gameOverDelay = 2f;
+    public float damageOverTime;
+    public float fadeDuration = 2f; // Time to fully fade in
 
     private Animator animator;
     private bool isDead = false;
     private float nextDamageTime = 0f;
 
-    public float damageOverTime;
+    // Reference to the GameOver UI panel and its Image component
+    public GameObject gameOverUI;
+    private Image gameOverImage;
+
+    // Audio-related fields
+    public AudioSource audioSource;
+    public AudioClip hitSound; // Add the hit sound
 
     void Start()
     {
@@ -23,6 +31,20 @@ public class PlayerHealth : MonoBehaviour
         healthBar.SetMaxHealth(maxHealth);
         animator = GetComponent<Animator>();
         InvokeRepeating("DamageOverTime", 0, 1f);
+
+        // Get the Image component of the GameOverUI panel
+        if (gameOverUI != null)
+        {
+            gameOverImage = gameOverUI.GetComponent<Image>();
+            gameOverImage.color = new Color(gameOverImage.color.r, gameOverImage.color.g, gameOverImage.color.b, 0f); // Set alpha to 0
+            gameOverUI.SetActive(false);  // Initially hide the panel
+        }
+
+        // Initialize the AudioSource if not already set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
     }
 
     void Update()
@@ -47,24 +69,13 @@ public class PlayerHealth : MonoBehaviour
 
     private void DamageOverTime()
     {
-        Debug.Log("Damage");
         currentHealth -= damageOverTime;
-
         healthBar.SetHealth(currentHealth);
-
-        //Play hurt anim
-        //animator.SetTrigger("Hurt");
 
         if (currentHealth <= 0)
         {
-            animator.SetTrigger("IsDead");
             Invoke("Die", 1f);
         }
-        else
-        {
-            Time.timeScale = 1;
-        }
-
     }
 
     public void TakeDamage(float damage)
@@ -77,14 +88,15 @@ public class PlayerHealth : MonoBehaviour
         currentHealth -= damage;
         healthBar.SetHealth(currentHealth);
 
+        // Play hit sound
+        if (hitSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(hitSound);
+        }
+
         if (currentHealth <= 0)
         {
             Die();
-        }
-        else
-        {
-            // Play hurt animation
-            animator.SetTrigger("Hurt");
         }
     }
 
@@ -92,10 +104,8 @@ public class PlayerHealth : MonoBehaviour
     {
         isDead = true;
         Debug.Log("Player died!");
-        animator.SetTrigger("IsDead");
-        // Disable player controls here
         GetComponent<Collider2D>().enabled = false;
-        
+
         // Start game over sequence
         StartCoroutine(GameOver());
     }
@@ -103,19 +113,39 @@ public class PlayerHealth : MonoBehaviour
     IEnumerator GameOver()
     {
         yield return new WaitForSeconds(gameOverDelay);
+
+        // Activate the GameOver UI and start the fade-in
         DisplayGameOverUI();
+
+        // Then stop the time after the panel starts fading in
+        Time.timeScale = 0;
     }
 
     void DisplayGameOverUI()
     {
-        GameObject gameOverUI = GameObject.Find("GameOverUI");
         if (gameOverUI != null)
         {
-            gameOverUI.SetActive(true);
+            gameOverUI.SetActive(true);  // Show the panel
+            StartCoroutine(FadeInGameOverUI());  // Start fading in
         }
         else
         {
             Debug.LogWarning("GameOverUI not found in the scene!");
+        }
+    }
+
+    IEnumerator FadeInGameOverUI()
+    {
+        float elapsedTime = 0f;
+        Color originalColor = gameOverImage.color;
+
+        // Gradually increase the alpha over the specified duration
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.unscaledDeltaTime;  // Continue during Time.timeScale = 0
+            float newAlpha = Mathf.Clamp01(elapsedTime / fadeDuration);
+            gameOverImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, newAlpha); // Set new alpha
+            yield return null;
         }
     }
 }

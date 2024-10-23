@@ -9,6 +9,9 @@ public class CraftingManager : BaseInventory
     public int id;
     [SerializeField] private Button craftingButton;
 
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip cookSound;
+
     private void Awake()
     {
         craftingButton.onClick.AddListener(OnCraftButtonClicked);
@@ -16,6 +19,7 @@ public class CraftingManager : BaseInventory
 
     private void OnCraftButtonClicked()
     {
+        audioSource.PlayOneShot(cookSound);
         // Handle crafting
         Craft();
     }

@@ -13,8 +13,15 @@ public class PlayerControl : MonoBehaviour
     public GameObject inventoryPanel;
     public GameObject craftingPanel;
     public GameObject servePanel;
+    public PlayerCombat playerCombat;
     public Animator animator;
     private string currentState;
+
+    public AudioClip footstepSound; // Footstep sound
+    private AudioSource audioSource; // Audio source to play the sound
+    private float footstepTimer = 0f; // Timer to control footstep frequency
+    public float footstepDelay = 0.5f; // Delay between footsteps
+
     //Animation States
     const string PLAYER_IDLE = "PlayerIdle";
     const string PLAYER_RUN_RIGHT = "PlayerRunRight";
@@ -22,7 +29,7 @@ public class PlayerControl : MonoBehaviour
     const string PLAYER_RUN_UP = "PlayerRunUp";
     const string PLAYER_RUN_DOWN = "PlayerRunDown";
 
-    private bool isMoving;
+    private bool isIdle;
 
     private DropItem currentDroppedItem;
     private bool itemInRange = false;
@@ -34,6 +41,7 @@ public class PlayerControl : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+
         //Cursor.visible = false;
         if (inventoryPanel != null)
         {
@@ -79,24 +87,26 @@ public class PlayerControl : MonoBehaviour
     public void Move()
     {
         // Movement
-        float speedX = Input.GetAxisRaw("Horizontal") * movSpeed;
-        float speedY = Input.GetAxisRaw("Vertical") * movSpeed;
+        speedX = Input.GetAxisRaw("Horizontal") * movSpeed;
+        speedY = Input.GetAxisRaw("Vertical") * movSpeed;
 
         // Update the velocity of the rigidbody based on the input
         rb.velocity = new Vector2(speedX, speedY);
+        animator.SetFloat("Speed", rb.velocity.magnitude);
 
         // Determine animation state based on movement direction
         if (speedX < 0)
         {
             // Moving left
-            ChangeAnimationState(PLAYER_RUN_RIGHT);
-            transform.localScale = new Vector2(-1, 1); // Flip the sprite to the left
+            ChangeAnimationState(PLAYER_RUN_LEFT);
+
+            //transform.localScale = new Vector2(-1, 1); // Flip the sprite to the left
         }
         else if (speedX > 0)
         {
             // Moving right
             ChangeAnimationState(PLAYER_RUN_RIGHT);
-            transform.localScale = new Vector2(1, 1); // Ensure sprite faces right
+            //transform.localScale = new Vector2(1, 1); // Ensure sprite faces right
         }
         else if (speedY > 0)
         {
@@ -114,6 +124,61 @@ public class PlayerControl : MonoBehaviour
             ChangeAnimationState(PLAYER_IDLE);
         }
 
+        // Handle footstep sound
+        if (rb.velocity.magnitude > 0 && footstepTimer <= 0f)
+        {
+            PlayFootstepSound();
+            footstepTimer = footstepDelay; // Reset the footstep timer
+        }
+
+        // Decrease the footstep timer over time
+        if (footstepTimer > 0)
+        {
+            footstepTimer -= Time.deltaTime;
+        }
+
+    }
+
+    void PlayFootstepSound()
+    {
+        if (footstepSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(footstepSound); // Play the footstep sound
+        }
+    }
+
+    public void OnAttackFinished()
+    {
+        currentState = PlayerCombat.PLAYER_ATTACK_DOWN;
+        playerCombat.FinishAttack();
+        // Determine animation state based on movement direction
+        if (speedX < 0)
+        {
+            // Moving left
+            ChangeAnimationState(PLAYER_RUN_LEFT);
+            //transform.localScale = new Vector2(-1, 1); // Flip the sprite to the left
+        }
+        else if (speedX > 0)
+        {
+            // Moving right
+            ChangeAnimationState(PLAYER_RUN_RIGHT);
+            //transform.localScale = new Vector2(1, 1); // Ensure sprite faces right
+        }
+        else if (speedY > 0)
+        {
+            // Moving up
+            ChangeAnimationState(PLAYER_RUN_UP);
+        }
+        else if (speedY < 0)
+        {
+            // Moving down
+            ChangeAnimationState(PLAYER_RUN_DOWN);
+        }
+        else
+        {
+            // Idle state (no movement)
+            ChangeAnimationState(PLAYER_IDLE);
+        }
     }
 
     public void ChangeAnimationStateAccordingToMovement()
@@ -124,12 +189,12 @@ public class PlayerControl : MonoBehaviour
         if (speedX < 0)
         {
             ChangeAnimationState(PLAYER_RUN_LEFT);
-            transform.localScale = new Vector2(-1, 1); // Face left
+            //transform.localScale = new Vector2(-1, 1); // Face left
         }
         else if (speedX > 0)
         {
             ChangeAnimationState(PLAYER_RUN_RIGHT);
-            transform.localScale = new Vector2(1, 1); // Face right
+            //transform.localScale = new Vector2(1, 1); // Face right
         }
         else if (speedY > 0)
         {

@@ -7,13 +7,13 @@ public class PlayerCombat : MonoBehaviour
     public Animator animator;
     public Transform attackPoint;
     public float attackRange = 0.5f;
-    public bool isAttacking = false;
+    public bool isAttacking;
     public LayerMask enemyLayers;
 
-    const string PLAYER_ATTACK_RIGHT = "PlayerAttackRight";
-    const string PLAYER_ATTACK_LEFT = "PlayerAttackLeft";
-    const string PLAYER_ATTACK_UP = "PlayerAttackUp";
-    const string PLAYER_ATTACK_DOWN = "PlayerAttackDown";
+    public const string PLAYER_ATTACK_RIGHT = "PlayerAttackRight";
+    public const string PLAYER_ATTACK_LEFT = "PlayerAttackLeft";
+    public const string PLAYER_ATTACK_UP = "PlayerAttackUp";
+    public const string PLAYER_ATTACK_DOWN = "PlayerAttackDown";
 
     public float attackDamage = 40f;
     public float attackRate;
@@ -24,6 +24,10 @@ public class PlayerCombat : MonoBehaviour
 
     private Vector3 defaultAttackPointPosition; // To store the default attack point position
 
+    // Audio-related fields
+    public AudioSource audioSource;
+    public AudioClip attackSound; // Add the attack sound
+
     void Start()
     {
         animator = GetComponent<Animator>();
@@ -31,6 +35,13 @@ public class PlayerCombat : MonoBehaviour
 
         // Store the default position of the attackPoint
         defaultAttackPointPosition = attackPoint.localPosition;
+        isAttacking = false;
+
+        // Initialize the AudioSource if not already set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
     }
 
     void Update()
@@ -39,6 +50,10 @@ public class PlayerCombat : MonoBehaviour
         if (!isAttacking) // Only allow attacking if not already attacking
         {
             Attack();
+        }
+        else
+        {
+            isAttacking = false;
         }
     }
 
@@ -59,30 +74,40 @@ public class PlayerCombat : MonoBehaviour
 
     void Attack()
     {
-        if (Time.time >= nextAttackTime && Input.GetKeyDown(KeyCode.Space))
+        if (Time.time >= nextAttackTime && Input.GetKey(KeyCode.Space))
         {
             isAttacking = true;
 
             // Adjust the attackPoint based on the player's direction
             if (lastDirection == Vector2.right)
             {
+                
                 animator.Play(PLAYER_ATTACK_RIGHT);
                 attackPoint.localPosition = new Vector2(1f, 0f); // Move attackPoint to the right
             }
             else if (lastDirection == Vector2.left)
             {
-                animator.Play(PLAYER_ATTACK_RIGHT);
-                attackPoint.localPosition = new Vector2(2f, 0f); // Move attackPoint to the left
+                
+                animator.Play(PLAYER_ATTACK_LEFT, 0);
+                attackPoint.localPosition = new Vector2(-1f, 0f); // Move attackPoint to the left
             }
             else if (lastDirection == Vector2.up)
             {
+               
                 animator.Play(PLAYER_ATTACK_UP);
                 attackPoint.localPosition = new Vector2(0f, 1f); // Move attackPoint upwards
             }
             else if (lastDirection == Vector2.down)
             {
+                
                 animator.Play(PLAYER_ATTACK_DOWN);
                 attackPoint.localPosition = new Vector2(0f, -1f); // Move attackPoint downwards
+            }
+
+            // Play attack sound
+            if (attackSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(attackSound);
             }
 
             // Detect and damage enemies
@@ -96,15 +121,18 @@ public class PlayerCombat : MonoBehaviour
             }
 
             // Reset isAttacking after short delay
-            StartCoroutine(EndAttackAfterAnimation());
+            //StartCoroutine(EndAttackAfterAnimation());
         }
     }
 
     IEnumerator EndAttackAfterAnimation()
     {
         // Wait for attack animation to complete
-        yield return new WaitForSeconds(.25f);
+        yield return new WaitForSeconds(1f);
+    }
 
+    public void FinishAttack()
+    {
         // Reset attack state and allow running again
         isAttacking = false;
 
